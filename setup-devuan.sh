@@ -100,5 +100,5 @@ apt clean
 ########################################
 # Reboot
 ########################################
-echo "[8/8] Rebooting now..."
-echo b > /proc/sysrq-trigger
+# echo "[8/8] Rebooting now..."
+# echo b > /proc/sysrq-trigger
