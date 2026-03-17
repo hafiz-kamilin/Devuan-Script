@@ -31,7 +31,7 @@ echo "[3/8] Installing ZRAM tools"
 
 apt install -y zram-tools
 
-echo "[*] Creating OpenRC zram service"
+echo "[*] OpenRC zram service"
 
 tee /etc/init.d/zramswap >/dev/null << 'EOF'
 #!/sbin/openrc-run
