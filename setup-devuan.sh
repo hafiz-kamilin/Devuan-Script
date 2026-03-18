@@ -261,6 +261,7 @@ echo "  rm -rf '${CONDARC_DIR}'   # if you no longer need the global config"
 sleep 10
 
 # ---------------------------- [7/9] Security Setup -----------------------------
+clear
 echo -e "${BLUE}########################################${RESET}"
 echo -e "${BLUE}#         [7/9] Security Setup         #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
