@@ -13,6 +13,9 @@ clear
 echo -e "${BLUE}########################################${RESET}"
 echo -e "${BLUE}#         [1/9] Update System          #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
+echo ""
+echo ""
+echo ""
 
 # Refresh Package Indexes And Upgrade All Packages Non-Interactively
 apt update && apt upgrade -y
@@ -25,6 +28,9 @@ clear
 echo -e "${BLUE}########################################${RESET}"
 echo -e "${BLUE}#          [2/9] OpenRC Init           #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
+echo ""
+echo ""
+echo ""
 
 # Install OpenRC Components On Devuan (Using OpenRC As Init)
 apt install -y openrc
@@ -43,6 +49,9 @@ clear
 echo -e "${BLUE}########################################${RESET}"
 echo -e "${BLUE}#        [3/9] ZRAM Optimization       #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
+echo ""
+echo ""
+echo ""
 
 # Install Zram-Tools For Compressed Swap In RAM
 apt install -y zram-tools
@@ -90,6 +99,9 @@ clear
 echo -e "${BLUE}########################################${RESET}"
 echo -e "${BLUE}#          [4/9] XFCE Desktop          #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
+echo ""
+echo ""
+echo ""
 
 # Install XFCE Desktop, Extras, Display Manager, And Synaptic
 apt install -y xfce4 xfce4-goodies lightdm synaptic
@@ -102,6 +114,9 @@ clear
 echo -e "${BLUE}########################################${RESET}"
 echo -e "${BLUE}#      [5/9] Consumer Application      #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
+echo ""
+echo ""
+echo ""
 
 # Install Common Desktop Applications (Browser, Media Player, Office Suite)
 apt install -y firefox-esr vlc libreoffice
@@ -114,6 +129,9 @@ clear
 echo -e "${BLUE}########################################${RESET}"
 echo -e "${BLUE}#        [6/9] Developer Tools         #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
+echo ""
+echo ""
+echo ""
 
 # Announce VS Code Installation
 echo -e "${GREEN}[*] Microsoft VS Code${RESET}"
@@ -255,6 +273,9 @@ sleep 10
 echo -e "${BLUE}########################################${RESET}"
 echo -e "${BLUE}#         [7/9] Security Setup         #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
+echo ""
+echo ""
+echo ""
 
 # Install Ufw (Firewall) And Gufw (Graphical Front End)
 apt install ufw gufw
@@ -273,6 +294,9 @@ clear
 echo -e "${BLUE}########################################${RESET}"
 echo -e "${BLUE}#      [8/9] Cleanup Installation      #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
+echo ""
+echo ""
+echo ""
 
 # Remove Unused Packages And Clean Apt Caches
 apt autoremove -y
@@ -288,6 +312,9 @@ clear
 echo -e "${BLUE}########################################${RESET}"
 echo -e "${BLUE}#         [9/9] Reboot System          #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
+echo ""
+echo ""
+echo ""
 
 # Pause Briefly Before Rebooting To Apply All Changes
 sleep 10
