@@ -1,43 +1,56 @@
 #!/bin/bash
+# Exit On First Error To Prevent Partial Configuration
 set -e
 
+# Define ANSI Color Codes For User-Friendly Output
 RED="\e[31m"
 GREEN="\e[32m"
 BLUE="\e[36m"
 RESET="\e[0m"
 
-########################################
-# Update
-########################################
+# ----------------------------- [1/9] Update System -----------------------------
+clear
+echo -e "${BLUE}########################################${RESET}"
+echo -e "${BLUE}#         [1/9] Update System          #${RESET}"
+echo -e "${BLUE}########################################${RESET}"
 
-echo -e "${BLUE}[1/9] Updating system${RESET}"
-
+# Refresh Package Indexes And Upgrade All Packages Non-Interactively
 apt update && apt upgrade -y
 
+# Pause Briefly To Let User Read Output
 sleep 10
 
-########################################
-# OpenRC
-########################################
+# ------------------------------ [2/9] OpenRC Init ------------------------------
+clear
+echo -e "${BLUE}########################################${RESET}"
+echo -e "${BLUE}#          [2/9] OpenRC Init           #${RESET}"
+echo -e "${BLUE}########################################${RESET}"
 
-echo -e "${BLUE}[2/9] Installing OpenRC${RESET}"
-
+# Install OpenRC Components On Devuan (Using OpenRC As Init)
 apt install -y openrc
+
+# Ensure Sbin Paths Are In The Shell Path For Convenience
 echo 'export PATH="$PATH:/sbin:/usr/sbin"' >> ~/.bashrc
+
+# Reload Updated Shell Configuration For Current Session
 source ~/.bashrc
 
+# Pause Briefly To Let User Read Output
 sleep 10
 
-########################################
-# ZRAM
-########################################
+# --------------------------- [3/9] ZRAM Optimization ---------------------------
+clear
+echo -e "${BLUE}########################################${RESET}"
+echo -e "${BLUE}#        [3/9] ZRAM Optimization       #${RESET}"
+echo -e "${BLUE}########################################${RESET}"
 
-echo -e "${BLUE}[3/9] Installing ZRAM tools${RESET}"
-
+# Install Zram-Tools For Compressed Swap In RAM
 apt install -y zram-tools
 
+# Inform That The OpenRC Zram Service Will Be Configured
 echo -e "${GREEN}[*] OpenRC zram service${RESET}"
 
+# Create OpenRC Service Script For Zramswap (Kept Exactly As Provided)
 tee /etc/init.d/zramswap >/dev/null << 'EOF'
 #!/sbin/openrc-run
 description="ZRAM swap management using zram-tools"
@@ -58,57 +71,80 @@ status() {
     /sbin/zramswap status
 }
 EOF
+
+# Make The Zramswap Init Script Executable
 chmod +x /etc/init.d/zramswap
+
+# Configure Compression Algorithm And Zram Size Percentage
 echo -e "ALGO=zstd\nPERCENT=75" | tee /etc/default/zramswap >/dev/null
+
+# Enable Zramswap Service At Default Runlevel And Start It Now
 rc-update add zramswap default
 rc-service zramswap start
 
+# Pause Briefly To Let User Read Output
 sleep 10
 
-########################################
-# Desktop
-########################################
+# ----------------------------- [4/9] XFCE Desktop ------------------------------
+clear
+echo -e "${BLUE}########################################${RESET}"
+echo -e "${BLUE}#          [4/9] XFCE Desktop          #${RESET}"
+echo -e "${BLUE}########################################${RESET}"
 
-echo -e "${BLUE}[4/9] Installing XFCE desktop${RESET}"
-
+# Install XFCE Desktop, Extras, Display Manager, And Synaptic
 apt install -y xfce4 xfce4-goodies lightdm synaptic
 
+# Pause Briefly To Let User Read Output
 sleep 10
 
-########################################
-# Consumer Apps
-########################################
+# ----------------------- [5/9] Consumer Application ---------------------------
+clear
+echo -e "${BLUE}########################################${RESET}"
+echo -e "${BLUE}#      [5/9] Consumer Application      #${RESET}"
+echo -e "${BLUE}########################################${RESET}"
 
-echo -e "${BLUE}[5/9] Installing consumer applications${RESET}"
-
+# Install Common Desktop Applications (Browser, Media Player, Office Suite)
 apt install -y firefox-esr vlc libreoffice
 
+# Pause Briefly To Let User Read Output
 sleep 10
 
-########################################
-# Developer Tools
-########################################
+# --------------------------- [6/9] Developer Tools -----------------------------
+clear
+echo -e "${BLUE}########################################${RESET}"
+echo -e "${BLUE}#        [6/9] Developer Tools         #${RESET}"
+echo -e "${BLUE}########################################${RESET}"
 
-echo -e "${BLUE}[6/9] Installing developer tools${RESET}"
-
+# Announce VS Code Installation
 echo -e "${GREEN}[*] Microsoft VS Code${RESET}"
 
+# Install Prerequisites For Adding External Repositories
 apt install -y wget gpg
+
+# Add Microsoft Signing Key And VS Code Repository
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
 install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
 echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
     | tee /etc/apt/sources.list.d/vscode.list > /dev/null
 rm -f packages.microsoft.gpg
+
+# Ensure Https Transport, Refresh Index, And Install VS Code
 apt install -y apt-transport-https
 apt update
 apt install -y code
 
+# Announce C/C++ Environment Installation
 echo -e "${GREEN}[*] C/C++ environment${RESET}"
 
+# Install Build Essentials (Compiler, Linker, Make, And Headers)
 apt install -y build-essential
 
+# Announce Miniforge (Python) Environment Installation
 echo -e "${GREEN}[*] Miniforge (Python) environment${RESET}"
 
+# -------------------------------------------------------------------------------
+# Begin Miniforge Global Installer Block (Standalone Script Embedded Intentionally)
+# -------------------------------------------------------------------------------
 #!/usr/bin/env bash
 # Install Miniforge globally (multi-user) on Linux
 # - Global install: /opt/miniforge3
@@ -123,12 +159,6 @@ PROFILED_FILE="/etc/profile.d/miniforge.sh"
 CONDARC_DIR="/etc/conda"
 CONDARC_FILE="${CONDARC_DIR}/condarc"
 USRBIN_CONDA="/usr/local/bin/conda"
-
-# --- root check ---
-if [[ "${EUID}" -ne 0 ]]; then
-  echo "This script must be run as root. Try: sudo $0"
-  exit 1
-fi
 
 # --- detect platform/arch and build URL ---
 OS="$(uname)"
@@ -150,7 +180,7 @@ else
   echo "Running installer to ${INSTALL_PREFIX} ..."
   bash "${INSTALLER}" -b -p "${INSTALL_PREFIX}"
 
-  # lock down ownership to root; users will keep envs in ~/.conda
+  # Lock down ownership to root; users will keep envs in ~/.conda
   chown -R root:root "${INSTALL_PREFIX}"
   chmod -R a+rX "${INSTALL_PREFIX}"
 fi
@@ -177,7 +207,7 @@ if [[ ! -e "${USRBIN_CONDA}" ]]; then
   ln -s "${INSTALL_PREFIX}/condabin/conda" "${USRBIN_CONDA}"
 fi
 
-# --- global conda configuration for multi-user layout ---
+# --- Global conda configuration for multi-user layout ---
 # Ensure each user keeps envs/pkgs in their own home directory
 echo "Writing system-wide .condarc at ${CONDARC_FILE} ..."
 mkdir -p "${CONDARC_DIR}"
@@ -214,38 +244,53 @@ echo "Uninstall (as root):"
 echo "  rm -rf '${INSTALL_PREFIX}'"
 echo "  rm -f  '${PROFILED_FILE}' '${USRBIN_CONDA}'"
 echo "  rm -rf '${CONDARC_DIR}'   # if you no longer need the global config"
+# -------------------------------------------------------------------------------
+# End Miniforge Global Installer Block
+# -------------------------------------------------------------------------------
 
+# Pause Briefly To Let User Read Output
 sleep 10
 
-########################################
-# Security
-########################################
+# ---------------------------- [7/9] Security Setup -----------------------------
+echo -e "${BLUE}########################################${RESET}"
+echo -e "${BLUE}#         [7/9] Security Setup         #${RESET}"
+echo -e "${BLUE}########################################${RESET}"
 
-echo -e "${BLUE}[7/9] Installing firewall${RESET}"
+# Install Ufw (Firewall) And Gufw (Graphical Front End)
+apt install ufw gufw
 
-sudo apt install ufw gufw
+# Optional: Uncomment Below To Apply Basic Firewall Policy
+# ufw default deny incoming
+# ufw default allow outgoing
+# ufw allow OpenSSH
+# ufw enable
 
+# Pause Briefly To Let User Read Output
 sleep 10
 
-########################################
-# Cleanup
-########################################
+# ------------------------ [8/9] Cleanup Installation ---------------------------
+clear
+echo -e "${BLUE}########################################${RESET}"
+echo -e "${BLUE}#      [8/9] Cleanup Installation      #${RESET}"
+echo -e "${BLUE}########################################${RESET}"
 
-echo -e "${BLUE}[8/9] Cleaning up${RESET}"
-
+# Remove Unused Packages And Clean Apt Caches
 apt autoremove -y
 apt autoremove --purge -y
 apt autoclean
 apt clean
 
+# Pause Briefly To Let User Read Output
 sleep 10
 
-########################################
-# Reboot
-########################################
+# --------------------------- [9/9] Reboot System -------------------------------
+clear
+echo -e "${BLUE}########################################${RESET}"
+echo -e "${BLUE}#         [9/9] Reboot System          #${RESET}"
+echo -e "${BLUE}########################################${RESET}"
 
-echo -e "${RED}[9/9] Rebooting in 10 seconds${RESET}"
-
+# Pause Briefly Before Rebooting To Apply All Changes
 sleep 10
 
+# Reboot The System
 /sbin/reboot
