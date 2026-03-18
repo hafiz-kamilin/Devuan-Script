@@ -1,8 +1,8 @@
 #!/bin/bash
-# Exit On First Error To Prevent Partial Configuration
+# Exit on first error to prevent partial configuration
 set -e
 
-# Define ANSI Color Codes For User-Friendly Output
+# Define ANSIcolor codes for user-friendly output
 RED="\e[31m"
 GREEN="\e[32m"
 BLUE="\e[36m"
@@ -15,12 +15,14 @@ echo -e "${BLUE}#         [1/9] Update System          #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
-echo 
+echo
+# # Pause briefly to let user read output
+sleep 3 
 
-# Refresh Package Indexes And Upgrade All Packages Non-Interactively
+# Refresh package indexes and upgrade all packages non-interactively
 apt update && apt upgrade -y
 
-# Pause Briefly To Let User Read Output
+# # Pause briefly to let user read output
 sleep 10
 
 # ------------------------------ [2/9] OpenRC Init ------------------------------
@@ -30,18 +32,18 @@ echo -e "${BLUE}#          [2/9] OpenRC Init           #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
-echo 
+echo
+# # Pause briefly to let user read output
+sleep 3 
 
-# Install OpenRC Components On Devuan (Using OpenRC As Init)
+# Install OpenRC components on Devuan (OpenRC as Init)
 apt install -y openrc
-
-# Ensure Sbin Paths Are In The Shell Path For Convenience
+# Ensure sbin paths are in the shell path for convenience
 echo 'export PATH="$PATH:/sbin:/usr/sbin"' >> ~/.bashrc
-
-# Reload Updated Shell Configuration For Current Session
+# Reload updated shell configuration for current session
 source ~/.bashrc
 
-# Pause Briefly To Let User Read Output
+# # Pause briefly to let user read output
 sleep 10
 
 # --------------------------- [3/9] ZRAM Optimization ---------------------------
@@ -51,15 +53,15 @@ echo -e "${BLUE}#        [3/9] ZRAM Optimization       #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
-echo 
+echo
+# # Pause briefly to let user read output
+sleep 3 
 
-# Install Zram-Tools For Compressed Swap In RAM
+# Install zram-tools for compressed swap in RAM
 apt install -y zram-tools
-
-# Inform That The OpenRC Zram Service Will Be Configured
+# Inform that the OpenRC zram service will be configured
 echo -e "${GREEN}[*] OpenRC zram service${RESET}"
-
-# Create OpenRC Service Script For Zramswap (Kept Exactly As Provided)
+# Create OpenRC service script for zramswap
 tee /etc/init.d/zramswap >/dev/null << 'EOF'
 #!/sbin/openrc-run
 description="ZRAM swap management using zram-tools"
@@ -80,18 +82,15 @@ status() {
     /sbin/zramswap status
 }
 EOF
-
-# Make The Zramswap Init Script Executable
+# Make the zramswap Init script executable
 chmod +x /etc/init.d/zramswap
-
-# Configure Compression Algorithm And Zram Size Percentage
+# Configure compression algorithm and zram size percentage
 echo -e "ALGO=zstd\nPERCENT=75" | tee /etc/default/zramswap >/dev/null
-
-# Enable Zramswap Service At Default Runlevel And Start It Now
+# Enable zramswap service at default runlevel and start it now
 rc-update add zramswap default
 rc-service zramswap start
 
-# Pause Briefly To Let User Read Output
+# # Pause briefly to let user read output
 sleep 10
 
 # ----------------------------- [4/9] XFCE Desktop ------------------------------
@@ -101,12 +100,14 @@ echo -e "${BLUE}#          [4/9] XFCE Desktop          #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
-echo 
+echo
+# # Pause briefly to let user read output
+sleep 3 
 
-# Install XFCE Desktop, Extras, Display Manager, And Synaptic
+# Install XFCE Desktop, extras, display manager, and package manager
 apt install -y xfce4 xfce4-goodies lightdm synaptic
 
-# Pause Briefly To Let User Read Output
+# # Pause briefly to let user read output
 sleep 10
 
 # ----------------------- [5/9] Consumer Application ---------------------------
@@ -116,12 +117,14 @@ echo -e "${BLUE}#      [5/9] Consumer Application      #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
-echo 
+echo
+# # Pause briefly to let user read output
+sleep 3 
 
-# Install Common Desktop Applications (Browser, Media Player, Office Suite)
+# Install common desktop applications (web browser, media player, office suite)
 apt install -y firefox-esr vlc libreoffice
 
-# Pause Briefly To Let User Read Output
+# # Pause briefly to let user read output
 sleep 10
 
 # --------------------------- [6/9] Developer Tools -----------------------------
@@ -131,37 +134,34 @@ echo -e "${BLUE}#        [6/9] Developer Tools         #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
-echo 
+echo
+# # Pause briefly to let user read output
+sleep 3 
 
-# Announce VS Code Installation
+# Announce VS Code installation
 echo -e "${GREEN}[*] Microsoft VS Code${RESET}"
-
-# Install Prerequisites For Adding External Repositories
+# Install prerequisites for adding external repositories
 apt install -y wget gpg
-
-# Add Microsoft Signing Key And VS Code Repository
+# Add Microsoft signing key and VS Code repository
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
 install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
 echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
     | tee /etc/apt/sources.list.d/vscode.list > /dev/null
 rm -f packages.microsoft.gpg
-
-# Ensure Https Transport, Refresh Index, And Install VS Code
+# Ensure HTTPS transport, refresh index, and install VS Code
 apt install -y apt-transport-https
 apt update
 apt install -y code
 
-# Announce C/C++ Environment Installation
+# Announce C/C++ environment installation
 echo -e "${GREEN}[*] C/C++ environment${RESET}"
-
-# Install Build Essentials (Compiler, Linker, Make, And Headers)
+# Install build essentials (compiler, linker, make, and headers)
 apt install -y build-essential
 
-# Announce Miniforge (Python) Environment Installation
+# Announce Miniforge (Python) environment installation
 echo -e "${GREEN}[*] Miniforge (Python) environment${RESET}"
-
 # -------------------------------------------------------------------------------
-# Begin Miniforge Global Installer Block (Standalone Script Embedded Intentionally)
+# Begin Miniforge global installer block (Standalone Script Embedded Intentionally)
 # -------------------------------------------------------------------------------
 #!/usr/bin/env bash
 # Install Miniforge globally (multi-user) on Linux
@@ -170,40 +170,33 @@ echo -e "${GREEN}[*] Miniforge (Python) environment${RESET}"
 # - Per-user envs/pkgs in ~/.conda
 # - Detectable by VS Code Python extension
 set -euo pipefail
-
-# --- settings ---
+# --- Settings ---
 INSTALL_PREFIX="${INSTALL_PREFIX:-/opt/miniforge3}"
 PROFILED_FILE="/etc/profile.d/miniforge.sh"
 CONDARC_DIR="/etc/conda"
 CONDARC_FILE="${CONDARC_DIR}/condarc"
 USRBIN_CONDA="/usr/local/bin/conda"
-
-# --- detect platform/arch and build URL ---
+# --- Detect platform/arch and build URL ---
 OS="$(uname)"
 ARCH="$(uname -m)"
 INSTALLER_URL="https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-${OS}-${ARCH}.sh"
-
-# --- idempotency: skip if already installed ---
+# --- Idempotency: skip if already installed ---
 if [[ -x "${INSTALL_PREFIX}/bin/conda" ]]; then
   echo "Miniforge already appears to be installed at ${INSTALL_PREFIX}"
 else
-  # --- download installer ---
+  # --- Download installer ---
   TMPDIR="$(mktemp -d)"
   trap 'rm -rf "$TMPDIR"' EXIT
   INSTALLER="${TMPDIR}/Miniforge3.sh"
-
   echo "Downloading Miniforge installer for ${OS} ${ARCH} ..."
   wget -q --show-progress -O "${INSTALLER}" "${INSTALLER_URL}"
-
   echo "Running installer to ${INSTALL_PREFIX} ..."
   bash "${INSTALLER}" -b -p "${INSTALL_PREFIX}"
-
   # Lock down ownership to root; users will keep envs in ~/.conda
   chown -R root:root "${INSTALL_PREFIX}"
   chmod -R a+rX "${INSTALL_PREFIX}"
 fi
-
-# --- make conda available in all user shells ---
+# --- Make conda available in all user shells ---
 # Provide PATH and shell functions via /etc/profile.d
 echo "Configuring ${PROFILED_FILE} ..."
 cat > "${PROFILED_FILE}" <<EOF
@@ -218,7 +211,6 @@ fi
 export CONDA_AUTO_ACTIVATE_BASE=false
 EOF
 chmod 0644 "${PROFILED_FILE}"
-
 # Also place a stable 'conda' entry in a globally searched location for tools (e.g., VS Code)
 # VS Code often invokes 'conda' directly; this symlink helps detection without sourcing shells.
 if [[ ! -e "${USRBIN_CONDA}" ]]; then
@@ -240,7 +232,6 @@ pkgs_dirs:
   - ~/.conda/pkgs
 YAML
 chmod 0644 "${CONDARC_FILE}"
-
 echo
 echo "✅ Miniforge installed globally at: ${INSTALL_PREFIX}"
 echo "➡  'conda' symlink: ${USRBIN_CONDA}"
@@ -263,10 +254,10 @@ echo "  rm -rf '${INSTALL_PREFIX}'"
 echo "  rm -f  '${PROFILED_FILE}' '${USRBIN_CONDA}'"
 echo "  rm -rf '${CONDARC_DIR}'   # if you no longer need the global config"
 # -------------------------------------------------------------------------------
-# End Miniforge Global Installer Block
+# End Miniforge global installer block
 # -------------------------------------------------------------------------------
 
-# Pause Briefly To Let User Read Output
+# # Pause briefly to let user read output
 sleep 10
 
 # ---------------------------- [7/9] Security Setup -----------------------------
@@ -275,18 +266,19 @@ echo -e "${BLUE}#         [7/9] Security Setup         #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
-echo 
+echo
+# # Pause briefly to let user read output
+sleep 3 
 
-# Install Ufw (Firewall) And Gufw (Graphical Front End)
-apt install ufw gufw
-
-# Optional: Uncomment Below To Apply Basic Firewall Policy
+# Install ufw (firewall) and gufw (graphical front end)
+apt install -y ufw gufw
+# Optional: Uncomment below to apply basic firewall policy
 # ufw default deny incoming
 # ufw default allow outgoing
 # ufw allow OpenSSH
 # ufw enable
 
-# Pause Briefly To Let User Read Output
+# # Pause briefly to let user read output
 sleep 10
 
 # ------------------------ [8/9] Cleanup Installation ---------------------------
@@ -296,15 +288,17 @@ echo -e "${BLUE}#      [8/9] Cleanup Installation      #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
-echo 
+echo
+# # Pause briefly to let user read output
+sleep 3 
 
-# Remove Unused Packages And Clean Apt Caches
+# Remove unused packages and clean apt caches
 apt autoremove -y
 apt autoremove --purge -y
 apt autoclean
 apt clean
 
-# Pause Briefly To Let User Read Output
+# # Pause briefly to let user read output
 sleep 10
 
 # --------------------------- [9/9] Reboot System -------------------------------
@@ -314,10 +308,12 @@ echo -e "${BLUE}#         [9/9] Reboot System          #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
-echo 
+echo
+# # Pause briefly to let user read output
+sleep 3 
 
-# Pause Briefly Before Rebooting To Apply All Changes
+# Pause briefly before rebooting to apply all changes
 sleep 10
 
-# Reboot The System
+# Reboot
 /sbin/reboot
