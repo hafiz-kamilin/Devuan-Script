@@ -10,7 +10,7 @@ RESET="\e[0m"
 # Update
 ########################################
 
-echo "${BLUE}[1/9] Updating system${RESET}"
+echo -e "${BLUE}[1/9] Updating system${RESET}"
 
 apt update && apt upgrade -y
 
@@ -20,7 +20,7 @@ sleep 10
 # OpenRC
 ########################################
 
-echo "${BLUE}[2/9] Installing OpenRC${RESET}"
+echo -e "${BLUE}[2/9] Installing OpenRC${RESET}"
 
 apt install -y openrc
 echo 'export PATH="$PATH:/sbin:/usr/sbin"' >> ~/.bashrc
@@ -32,11 +32,11 @@ sleep 10
 # ZRAM
 ########################################
 
-echo "${BLUE}[3/9] Installing ZRAM tools${RESET}"
+echo -e "${BLUE}[3/9] Installing ZRAM tools${RESET}"
 
 apt install -y zram-tools
 
-echo "${GREEN}[*] OpenRC zram service${RESET}"
+echo -e "${GREEN}[*] OpenRC zram service${RESET}"
 
 tee /etc/init.d/zramswap >/dev/null << 'EOF'
 #!/sbin/openrc-run
@@ -69,7 +69,7 @@ sleep 10
 # Desktop
 ########################################
 
-echo "${BLUE}[4/9] Installing XFCE desktop${RESET}"
+echo -e "${BLUE}[4/9] Installing XFCE desktop${RESET}"
 
 apt install -y xfce4 xfce4-goodies lightdm synaptic
 
@@ -79,7 +79,7 @@ sleep 10
 # Consumer Apps
 ########################################
 
-echo "${BLUE}[5/9] Installing consumer applications${RESET}"
+echo -e "${BLUE}[5/9] Installing consumer applications${RESET}"
 
 apt install -y firefox-esr vlc libreoffice
 
@@ -89,9 +89,9 @@ sleep 10
 # Developer Tools
 ########################################
 
-echo "${BLUE}[6/9] Installing developer tools${RESET}"
+echo -e "${BLUE}[6/9] Installing developer tools${RESET}"
 
-echo "${GREEN}[*] Microsoft VS Code${RESET}"
+echo -e "${GREEN}[*] Microsoft VS Code${RESET}"
 
 apt install -y wget gpg
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
@@ -103,11 +103,11 @@ apt install -y apt-transport-https
 apt update
 apt install -y code
 
-echo "${GREEN}[*] C/C++ environment${RESET}"
+echo -e "${GREEN}[*] C/C++ environment${RESET}"
 
 apt install -y build-essential
 
-echo "${GREEN}[*] Miniforge (Python) environment${RESET}"
+echo -e "${GREEN}[*] Miniforge (Python) environment${RESET}"
 
 #!/usr/bin/env bash
 # Install Miniforge globally (multi-user) on Linux
@@ -221,7 +221,7 @@ sleep 10
 # Security
 ########################################
 
-echo "${BLUE}[8/9] Installing firewall${RESET}"
+echo -e "${BLUE}[7/9] Installing firewall${RESET}"
 
 sudo apt install ufw gufw
 
@@ -231,7 +231,7 @@ sleep 10
 # Cleanup
 ########################################
 
-echo "${BLUE}[7/9] Cleaning up${RESET}"
+echo -e "${BLUE}[8/9] Cleaning up${RESET}"
 
 apt autoremove -y
 apt autoremove --purge -y
@@ -244,7 +244,7 @@ sleep 10
 # Reboot
 ########################################
 
-echo "${RED}[8/9] Rebooting in 10 seconds${RESET}"
+echo -e "${RED}[9/9] Rebooting in 10 seconds${RESET}"
 
 sleep 10
 
