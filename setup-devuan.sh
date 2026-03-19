@@ -287,10 +287,9 @@ sleep 3
 # Install and configure the firewall
 apt-get update
 apt-get install -y ufw gufw
-# Optional: basic policy. If this is a remote server, allow SSH BEFORE enable.
+# Optional: basic policy.
 ufw default deny incoming
 ufw default allow outgoing
-ufw allow OpenSSH
 ufw --force enable
 
 # Install and configure the unattended upgrades
