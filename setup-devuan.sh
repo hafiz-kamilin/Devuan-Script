@@ -139,7 +139,8 @@ apt install -y firefox-esr vlc libreoffice evince
 # Install IME (use IBUS for simplicity):
 apt-get install -y ibus-mozc
 # Install Japanese fonts and Libreoffice addons for Japanese
-fonts-noto fonts-noto-cjk fonts-noto-color-emoji libreoffice-l10n-ja fonts-noto-cjk-extra
+apt install -y fonts-noto-cjk fonts-noto-cjk-extra fonts-noto-color-emoji libreoffice-l10n-ja
+
 
 # Pause briefly to let user read output
 sleep 10
