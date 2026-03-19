@@ -88,7 +88,7 @@ chmod +x /etc/init.d/zramswap
 # Configure compression algorithm and zram size percentage
 echo -e "ALGO=zstd\nPERCENT=75\nPRIORITY=100" | tee /etc/default/zramswap >/dev/null
 # Configure the swapppiness and VFS cache pressure
-echo -e "vm.swappiness=80\nvm.vfs_cache_pressure=50" | sudo tee /etc/sysctl.d/99-custom.conf
+echo -e "vm.swappiness=80\nvm.vfs_cache_pressure=50" | tee /etc/sysctl.d/99-custom.conf
 # Enable zramswap service at default runlevel and start it now
 rc-update add zramswap default
 rc-service zramswap start
