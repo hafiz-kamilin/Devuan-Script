@@ -22,6 +22,13 @@ sleep 3
 # Refresh package indexes and upgrade all packages non-interactively
 apt update && apt upgrade -y
 
+# Add non-free-firmware (keep your mirror lines; just add the components)
+sed -i 's/ main$/ main contrib non-free non-free-firmware/' /etc/apt/sources.list
+sed -i 's/ main$/ main contrib non-free non-free-firmware/' /etc/apt/sources.list.d/*.list 2>/dev/null || true
+apt update
+# Intel microcode + generic firmware bundles
+apt install -y intel-microcode firmware-misc-nonfree
+
 # Pause briefly to let user read output
 sleep 10
 
@@ -42,6 +49,10 @@ apt install -y openrc
 echo 'export PATH="$PATH:/sbin:/usr/sbin"' >> ~/.bashrc
 # Reload updated shell configuration for current session
 source ~/.bashrc
+
+# Schedule weekly TRIM of all supported mounts with OpenRC
+printf '#!/bin/sh\n/usr/sbin/fstrim -A -v || true\n' > /etc/cron.weekly/fstrim
+chmod +x /etc/cron.weekly/fstrim
 
 # Pause briefly to let user read output
 sleep 10
@@ -125,10 +136,10 @@ sleep 3
 
 # Install common applications (web browser, media player, office suite)
 apt install -y firefox-esr vlc libreoffice evince
-# # Install IME (use IBUS for simplicity):
-# apt-get install -y ibus-mozc
-# # Install Japanese fonts and Libreoffice addons for Japanese
-# fonts-noto fonts-noto-cjk fonts-noto-color-emoji libreoffice-l10n-ja fonts-noto-cjk-extra
+# Install IME (use IBUS for simplicity):
+apt-get install -y ibus-mozc
+# Install Japanese fonts and Libreoffice addons for Japanese
+fonts-noto fonts-noto-cjk fonts-noto-color-emoji libreoffice-l10n-ja fonts-noto-cjk-extra
 
 # Pause briefly to let user read output
 sleep 10
@@ -275,48 +286,48 @@ sleep 3
 # Install and configure the firewall
 apt-get update
 apt-get install -y ufw gufw
-# # Optional: basic policy. If this is a remote server, allow SSH BEFORE enable.
-# ufw default deny incoming
-# ufw default allow outgoing
-# ufw allow OpenSSH
-# ufw --force enable
+# Optional: basic policy. If this is a remote server, allow SSH BEFORE enable.
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow OpenSSH
+ufw --force enable
 
-# # Install and configure the unattended upgrades
-# apt-get install -y unattended-upgrades
-# # Enable the daily unattended-upgrades job (cron-based on Debian/Devuan)
-# cat >/etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
-# APT::Periodic::Update-Package-Lists "1";
-# APT::Periodic::Download-Upgradeable-Packages "1";
-# APT::Periodic::AutocleanInterval "7";
-# APT::Periodic::Unattended-Upgrade "1";
-# EOF
-# # (Optional) A sane default 50unattended-upgrades for security-only updates.
-# # Adjust the "Origins-Pattern" if your system reports different origins
-# # (check with: apt-cache policy | sed -n '1,120p').
-# cat >/etc/apt/apt.conf.d/50unattended-upgrades <<'EOF'
-# // Auto-install only security updates by default.
-# Unattended-Upgrade::Origins-Pattern {
-#     "o=Debian,a=stable-security";
-#     // On Devuan, security updates often come from Debian security.
-#     // If your system shows different origins, add them here.
-#     // Example for stable updates too (optional):
-#     // "o=Debian,a=stable";
-# };
-# Unattended-Upgrade::AutoFixInterruptedDpkg "true";
-# Unattended-Upgrade::MinimalSteps "true";
-# Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
-# Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
-# // Reboot only if needed, at a safe time (optional).
-# Unattended-Upgrade::Automatic-Reboot "true";
-# Unattended-Upgrade::Automatic-Reboot-Time "02:00";
-# // Package blacklist example:
-# //Unattended-Upgrade::Package-Blacklist {
-# //  "nvidia-driver";
-# //  "docker*";
-# //};
-# EOF
-# # Quick dry run to verify configuration (won’t actually install):
-# unattended-upgrade --dry-run --debug || true
+# Install and configure the unattended upgrades
+apt-get install -y unattended-upgrades
+# Enable the daily unattended-upgrades job (cron-based on Debian/Devuan)
+cat >/etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Download-Upgradeable-Packages "1";
+APT::Periodic::AutocleanInterval "7";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
+# (Optional) A sane default 50unattended-upgrades for security-only updates.
+# Adjust the "Origins-Pattern" if your system reports different origins
+# (check with: apt-cache policy | sed -n '1,120p').
+cat >/etc/apt/apt.conf.d/50unattended-upgrades <<'EOF'
+// Auto-install only security updates by default.
+Unattended-Upgrade::Origins-Pattern {
+    "o=Debian,a=stable-security";
+    // On Devuan, security updates often come from Debian security.
+    // If your system shows different origins, add them here.
+    // Example for stable updates too (optional):
+    // "o=Debian,a=stable";
+};
+Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+Unattended-Upgrade::MinimalSteps "true";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+// Reboot only if needed, at a safe time (optional).
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+// Package blacklist example:
+//Unattended-Upgrade::Package-Blacklist {
+//  "nvidia-driver";
+//  "docker*";
+//};
+EOF
+# Quick dry run to verify configuration (won’t actually install):
+unattended-upgrade --dry-run --debug || true
 
 # Pause briefly to let user read output
 sleep 10
