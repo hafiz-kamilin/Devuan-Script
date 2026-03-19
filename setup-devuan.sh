@@ -16,13 +16,13 @@ echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
 echo
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 3 
 
 # Refresh package indexes and upgrade all packages non-interactively
 apt update && apt upgrade -y
 
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 10
 
 # ------------------------------ [2/9] OpenRC Init ------------------------------
@@ -33,7 +33,7 @@ echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
 echo
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 3 
 
 # Install OpenRC components on Devuan (OpenRC as Init)
@@ -43,7 +43,7 @@ echo 'export PATH="$PATH:/sbin:/usr/sbin"' >> ~/.bashrc
 # Reload updated shell configuration for current session
 source ~/.bashrc
 
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 10
 
 # --------------------------- [3/9] ZRAM Optimization ---------------------------
@@ -54,7 +54,7 @@ echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
 echo
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 3 
 
 # Install zram-tools for compressed swap in RAM
@@ -66,7 +66,8 @@ tee /etc/init.d/zramswap >/dev/null << 'EOF'
 #!/sbin/openrc-run
 description="ZRAM swap management using zram-tools"
 depend() {
-    need checkroot
+    need checkroot localmount
+    use swap
 }
 start() {
     ebegin "Starting zramswap"
@@ -85,12 +86,14 @@ EOF
 # Make the zramswap Init script executable
 chmod +x /etc/init.d/zramswap
 # Configure compression algorithm and zram size percentage
-echo -e "ALGO=zstd\nPERCENT=75" | tee /etc/default/zramswap >/dev/null
+echo -e "ALGO=zstd\nPERCENT=75\nPRIORITY=100" | tee /etc/default/zramswap >/dev/null
+# Configure the swapppiness and VFS cache pressure
+echo -e "vm.swappiness=80\nvm.vfs_cache_pressure=50" | sudo tee /etc/sysctl.d/99-custom.conf
 # Enable zramswap service at default runlevel and start it now
 rc-update add zramswap default
 rc-service zramswap start
 
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 10
 
 # ----------------------------- [4/9] XFCE Desktop ------------------------------
@@ -101,13 +104,13 @@ echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
 echo
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 3 
 
 # Install XFCE Desktop, extras, display manager, and package manager
 apt install -y xfce4 xfce4-goodies lightdm synaptic
 
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 10
 
 # ----------------------- [5/9] Consumer Application ---------------------------
@@ -118,13 +121,17 @@ echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
 echo
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 3 
 
-# Install common desktop applications (web browser, media player, office suite)
-apt install -y firefox-esr vlc libreoffice
+# Install common applications (web browser, media player, office suite)
+apt install -y firefox-esr vlc libreoffice evince
+# # Install IME (use IBUS for simplicity):
+# apt-get install -y ibus-mozc
+# # Install Japanese fonts and Libreoffice addons for Japanese
+# fonts-noto fonts-noto-cjk fonts-noto-color-emoji libreoffice-l10n-ja fonts-noto-cjk-extra
 
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 10
 
 # --------------------------- [6/9] Developer Tools -----------------------------
@@ -135,7 +142,7 @@ echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
 echo
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 3 
 
 # Announce VS Code installation
@@ -160,9 +167,7 @@ apt install -y build-essential
 
 # Announce Miniforge (Python) environment installation
 echo -e "${GREEN}[*] Miniforge (Python) environment${RESET}"
-# -------------------------------------------------------------------------------
 # Begin Miniforge global installer block (Standalone Script Embedded Intentionally)
-# -------------------------------------------------------------------------------
 #!/usr/bin/env bash
 # Install Miniforge globally (multi-user) on Linux
 # - Global install: /opt/miniforge3
@@ -216,7 +221,6 @@ chmod 0644 "${PROFILED_FILE}"
 if [[ ! -e "${USRBIN_CONDA}" ]]; then
   ln -s "${INSTALL_PREFIX}/condabin/conda" "${USRBIN_CONDA}"
 fi
-
 # --- Global conda configuration for multi-user layout ---
 # Ensure each user keeps envs/pkgs in their own home directory
 echo "Writing system-wide .condarc at ${CONDARC_FILE} ..."
@@ -253,11 +257,9 @@ echo "Uninstall (as root):"
 echo "  rm -rf '${INSTALL_PREFIX}'"
 echo "  rm -f  '${PROFILED_FILE}' '${USRBIN_CONDA}'"
 echo "  rm -rf '${CONDARC_DIR}'   # if you no longer need the global config"
-# -------------------------------------------------------------------------------
 # End Miniforge global installer block
-# -------------------------------------------------------------------------------
 
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 10
 
 # ---------------------------- [7/9] Security Setup -----------------------------
@@ -268,18 +270,56 @@ echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
 echo
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 3 
 
-# Install ufw (firewall) and gufw (graphical front end)
-apt install -y ufw gufw
-# Optional: Uncomment below to apply basic firewall policy
+# Install and configure the firewall
+apt-get update
+apt-get install -y ufw gufw
+# # Optional: basic policy. If this is a remote server, allow SSH BEFORE enable.
 # ufw default deny incoming
 # ufw default allow outgoing
 # ufw allow OpenSSH
-# ufw enable
+# ufw --force enable
 
-# # Pause briefly to let user read output
+# # Install and configure the unattended upgrades
+# apt-get install -y unattended-upgrades
+# # Enable the daily unattended-upgrades job (cron-based on Debian/Devuan)
+# cat >/etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
+# APT::Periodic::Update-Package-Lists "1";
+# APT::Periodic::Download-Upgradeable-Packages "1";
+# APT::Periodic::AutocleanInterval "7";
+# APT::Periodic::Unattended-Upgrade "1";
+# EOF
+# # (Optional) A sane default 50unattended-upgrades for security-only updates.
+# # Adjust the "Origins-Pattern" if your system reports different origins
+# # (check with: apt-cache policy | sed -n '1,120p').
+# cat >/etc/apt/apt.conf.d/50unattended-upgrades <<'EOF'
+# // Auto-install only security updates by default.
+# Unattended-Upgrade::Origins-Pattern {
+#     "o=Debian,a=stable-security";
+#     // On Devuan, security updates often come from Debian security.
+#     // If your system shows different origins, add them here.
+#     // Example for stable updates too (optional):
+#     // "o=Debian,a=stable";
+# };
+# Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+# Unattended-Upgrade::MinimalSteps "true";
+# Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+# Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+# // Reboot only if needed, at a safe time (optional).
+# Unattended-Upgrade::Automatic-Reboot "true";
+# Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+# // Package blacklist example:
+# //Unattended-Upgrade::Package-Blacklist {
+# //  "nvidia-driver";
+# //  "docker*";
+# //};
+# EOF
+# # Quick dry run to verify configuration (won’t actually install):
+# unattended-upgrade --dry-run --debug || true
+
+# Pause briefly to let user read output
 sleep 10
 
 # ------------------------ [8/9] Cleanup Installation ---------------------------
@@ -290,7 +330,7 @@ echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
 echo
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 3 
 
 # Remove unused packages and clean apt caches
@@ -299,7 +339,7 @@ apt autoremove --purge -y
 apt autoclean
 apt clean
 
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 10
 
 # --------------------------- [9/9] Reboot System -------------------------------
@@ -310,7 +350,7 @@ echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
 echo
-# # Pause briefly to let user read output
+# Pause briefly to let user read output
 sleep 3 
 
 # Pause briefly before rebooting to apply all changes
