@@ -66,8 +66,7 @@ tee /etc/init.d/zramswap >/dev/null << 'EOF'
 #!/sbin/openrc-run
 description="ZRAM swap management using zram-tools"
 depend() {
-    need checkroot localmount
-    use swap
+    need checkroot
 }
 start() {
     ebegin "Starting zramswap"
