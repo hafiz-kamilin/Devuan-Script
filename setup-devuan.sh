@@ -8,10 +8,10 @@ GREEN="\e[32m"
 BLUE="\e[36m"
 RESET="\e[0m"
 
-# ----------------------------- [1/9] Update System -----------------------------
+# ----------------------------- [1/10] Update System -----------------------------
 clear
 echo -e "${BLUE}########################################${RESET}"
-echo -e "${BLUE}#         [1/9] Update System          #${RESET}"
+echo -e "${BLUE}#        [1/10] Update System          #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
@@ -32,10 +32,10 @@ apt install -y intel-microcode firmware-misc-nonfree
 # Pause briefly to let user read output
 sleep 10
 
-# ------------------------------ [2/9] OpenRC Init ------------------------------
+# ------------------------------ [2/10] OpenRC Init ------------------------------
 clear
 echo -e "${BLUE}########################################${RESET}"
-echo -e "${BLUE}#          [2/9] OpenRC Init           #${RESET}"
+echo -e "${BLUE}#         [2/10] OpenRC Init           #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
@@ -50,6 +50,20 @@ echo 'export PATH="$PATH:/sbin:/usr/sbin"' >> ~/.bashrc
 # Reload updated shell configuration for current session
 source ~/.bashrc
 
+# Pause briefly to let user read output
+sleep 10
+
+# ------------------------------ [3/10] OpenRC Init ------------------------------
+clear
+echo -e "${BLUE}########################################${RESET}"
+echo -e "${BLUE}#       [3/10] SSD Trim Schedule       #${RESET}"
+echo -e "${BLUE}########################################${RESET}"
+echo 
+echo 
+echo
+# Pause briefly to let user read output
+sleep 3 
+
 # Schedule weekly TRIM of all supported mounts with OpenRC
 printf '#!/bin/sh\n/usr/sbin/fstrim -A -v || true\n' > /etc/cron.weekly/fstrim
 chmod +x /etc/cron.weekly/fstrim
@@ -57,10 +71,10 @@ chmod +x /etc/cron.weekly/fstrim
 # Pause briefly to let user read output
 sleep 10
 
-# --------------------------- [3/9] ZRAM Optimization ---------------------------
+# --------------------------- [4/10] ZRAM Optimization ---------------------------
 clear
 echo -e "${BLUE}########################################${RESET}"
-echo -e "${BLUE}#        [3/9] ZRAM Optimization       #${RESET}"
+echo -e "${BLUE}#       [4/10] ZRAM Optimization       #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
@@ -98,7 +112,7 @@ chmod +x /etc/init.d/zramswap
 # Configure compression algorithm and zram size percentage
 echo -e "ALGO=zstd\nPERCENT=75\nPRIORITY=100" | tee /etc/default/zramswap >/dev/null
 # Configure the swapppiness and VFS cache pressure
-echo -e "vm.swappiness=80\nvm.vfs_cache_pressure=50" | tee /etc/sysctl.d/99-custom.conf
+echo -e "vm.swappiness=60\nvm.vfs_cache_pressure=50" | tee /etc/sysctl.d/99-custom.conf
 # Enable zramswap service at default runlevel and start it now
 rc-update add zramswap default
 rc-service zramswap start
@@ -106,10 +120,10 @@ rc-service zramswap start
 # Pause briefly to let user read output
 sleep 10
 
-# ----------------------------- [4/9] XFCE Desktop ------------------------------
+# ----------------------------- [5/10] XFCE Desktop ------------------------------
 clear
 echo -e "${BLUE}########################################${RESET}"
-echo -e "${BLUE}#          [4/9] XFCE Desktop          #${RESET}"
+echo -e "${BLUE}#         [5/10] XFCE Desktop          #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
@@ -117,16 +131,16 @@ echo
 # Pause briefly to let user read output
 sleep 3 
 
-# Install XFCE Desktop, extras, display manager, and package manager
+# Install desktop, extras, display manager, and package manager
 apt install -y xfce4 xfce4-goodies lightdm synaptic
 
 # Pause briefly to let user read output
 sleep 10
 
-# ----------------------- [5/9] Consumer Application ---------------------------
+# ----------------------- [6/10] Consumer Application ---------------------------
 clear
 echo -e "${BLUE}########################################${RESET}"
-echo -e "${BLUE}#      [5/9] Consumer Application      #${RESET}"
+echo -e "${BLUE}#     [6/10] Consumer Application      #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
@@ -141,14 +155,13 @@ apt-get install -y ibus-mozc
 # Install Japanese fonts and Libreoffice addons for Japanese
 apt install -y fonts-noto-cjk fonts-noto-cjk-extra fonts-noto-color-emoji libreoffice-l10n-ja
 
-
 # Pause briefly to let user read output
 sleep 10
 
-# --------------------------- [6/9] Developer Tools -----------------------------
+# --------------------------- [7/10] Developer Tools -----------------------------
 clear
 echo -e "${BLUE}########################################${RESET}"
-echo -e "${BLUE}#        [6/9] Developer Tools         #${RESET}"
+echo -e "${BLUE}#       [7/10] Developer Tools         #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
@@ -174,7 +187,7 @@ apt install -y code
 # Announce C/C++ environment installation
 echo -e "${GREEN}[*] C/C++ environment${RESET}"
 # Install build essentials (compiler, linker, make, and headers)
-apt install -y build-essential
+apt install -y build-essential cmake ninja-build gdb valgrind pkgconf manpages-dev
 
 # Announce Miniforge (Python) environment installation
 echo -e "${GREEN}[*] Miniforge (Python) environment${RESET}"
@@ -273,10 +286,10 @@ echo "  rm -rf '${CONDARC_DIR}'   # if you no longer need the global config"
 # Pause briefly to let user read output
 sleep 10
 
-# ---------------------------- [7/9] Security Setup -----------------------------
+# ---------------------------- [8/10] Security Setup -----------------------------
 clear
 echo -e "${BLUE}########################################${RESET}"
-echo -e "${BLUE}#         [7/9] Security Setup         #${RESET}"
+echo -e "${BLUE}#        [8/10] Security Setup         #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
@@ -284,16 +297,19 @@ echo
 # Pause briefly to let user read output
 sleep 3 
 
+# Announce firewall installation
+echo "Firewall setup"
 # Install and configure the firewall
-apt-get update
-apt-get install -y ufw gufw
+apt install -y ufw gufw
 # Optional: basic policy.
 ufw default deny incoming
 ufw default allow outgoing
 ufw --force enable
 
+# Announce unattended upgrades installation
+echo "Unattended upgrades setup"
 # Install and configure the unattended upgrades
-apt-get install -y unattended-upgrades
+apt install -y unattended-upgrades
 # Enable the daily unattended-upgrades job (cron-based on Debian/Devuan)
 cat >/etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
 APT::Periodic::Update-Package-Lists "1";
@@ -317,14 +333,14 @@ Unattended-Upgrade::AutoFixInterruptedDpkg "true";
 Unattended-Upgrade::MinimalSteps "true";
 Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
 Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
-// Reboot only if needed, at a safe time (optional).
-Unattended-Upgrade::Automatic-Reboot "true";
-Unattended-Upgrade::Automatic-Reboot-Time "02:00";
-// Package blacklist example:
-//Unattended-Upgrade::Package-Blacklist {
+// // Reboot only if needed, at a safe time (optional).
+// Unattended-Upgrade::Automatic-Reboot "true";
+// Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+// // Package blacklist example:
+// Unattended-Upgrade::Package-Blacklist {
 //  "nvidia-driver";
 //  "docker*";
-//};
+// };
 EOF
 # Quick dry run to verify configuration (won’t actually install):
 unattended-upgrade --dry-run --debug || true
@@ -332,10 +348,10 @@ unattended-upgrade --dry-run --debug || true
 # Pause briefly to let user read output
 sleep 10
 
-# ------------------------ [8/9] Cleanup Installation ---------------------------
+# ------------------------ [9/10] Cleanup Installation ---------------------------
 clear
 echo -e "${BLUE}########################################${RESET}"
-echo -e "${BLUE}#      [8/9] Cleanup Installation      #${RESET}"
+echo -e "${BLUE}#     [9/10] Cleanup Installation      #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
@@ -352,10 +368,10 @@ apt clean
 # Pause briefly to let user read output
 sleep 10
 
-# --------------------------- [9/9] Reboot System -------------------------------
+# --------------------------- [10/10] Reboot System -------------------------------
 clear
 echo -e "${BLUE}########################################${RESET}"
-echo -e "${BLUE}#         [9/9] Reboot System          #${RESET}"
+echo -e "${BLUE}#        [10/10] Reboot System         #${RESET}"
 echo -e "${BLUE}########################################${RESET}"
 echo 
 echo 
