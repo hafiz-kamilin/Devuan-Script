@@ -132,7 +132,7 @@ echo
 sleep 3 
 
 # Install desktop, extras, display manager, and package manager
-apt install -y xfce4 xfce4-goodies lightdm synaptic
+apt install -y xfce4 xfce4-goodies galculator lightdm synaptic
 
 # Pause briefly to let user read output
 sleep 10
@@ -384,3 +384,6 @@ sleep 10
 
 # Reboot
 /sbin/reboot
+
+# TODO
+# check "post‑install lock‑down" setup 
