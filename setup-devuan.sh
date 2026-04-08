@@ -133,8 +133,8 @@ echo
 # Pause briefly to let user read output
 sleep 3 
 
-# Install desktop, extras, display manager, and package manager
-apt install -y xfce4 xfce4-goodies galculator lightdm synaptic
+# Install desktop, extras, calculator, internet manager, display manager, and package manager
+apt install -y xfce4 xfce4-goodies galculator connman connman-gtk lightdm synaptic
 
 # Pause briefly to let user read output
 sleep 10
