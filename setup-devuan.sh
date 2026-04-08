@@ -28,6 +28,8 @@ sed -i 's/ main$/ main contrib non-free non-free-firmware/' /etc/apt/sources.lis
 apt update
 # Intel microcode + generic firmware bundles
 apt install -y intel-microcode firmware-misc-nonfree
+# Automatic time update from the internet
+apt install chrony
 
 # Pause briefly to let user read output
 sleep 10
