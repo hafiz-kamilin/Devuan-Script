@@ -55,7 +55,7 @@ source ~/.bashrc
 # Pause briefly to let user read output
 sleep 10
 
-# ------------------------------ [3/10] OpenRC Init ------------------------------
+# ------------------------------ [3/10] SSD Trim Sechedule ------------------------
 clear
 echo -e "${BLUE}########################################${RESET}"
 echo -e "${BLUE}#       [3/10] SSD Trim Schedule       #${RESET}"
@@ -119,6 +119,36 @@ echo -e "vm.swappiness=60\nvm.vfs_cache_pressure=50" | tee /etc/sysctl.d/99-cust
 rc-update add zramswap default
 rc-service zramswap start
 
+SWAPFILE="/swapfile"
+SWAPSIZE="4G"
+
+## Only create swapfile if it does not already exist
+if [ ! -f "$SWAPFILE" ]; then
+    echo "Creating $SWAPSIZE disk swapfile at $SWAPFILE"
+
+    ## Allocate swapfile (fallocate is fast; dd fallback handled by kernel)
+    fallocate -l "$SWAPSIZE" "$SWAPFILE" 2>/dev/null || \
+        dd if=/dev/zero of="$SWAPFILE" bs=1M count=4096
+
+    ## Secure permissions
+    chmod 600 "$SWAPFILE"
+
+    ## Make swap area
+    mkswap "$SWAPFILE"
+
+    ## Enable swap immediately with lower priority than zram
+    swapon -p 10 "$SWAPFILE"
+
+    ## Persist across reboots
+    echo "$SWAPFILE none swap sw,pri=10 0 0" >> /etc/fstab
+else
+    echo "Swapfile already exists — skipping creation"
+    swapon "$SWAPFILE" || true
+fi
+
+## Show active swap devices
+swapon --show
+
 # Pause briefly to let user read output
 sleep 10
 
@@ -133,7 +163,7 @@ echo
 # Pause briefly to let user read output
 sleep 3 
 
-# Install desktop, extras, calculator, internet manager, display manager, and package manager
+# Install desktop, extras, calculator, internet connection manager, display manager, and package manager
 apt install -y xfce4 xfce4-goodies galculator connman connman-gtk lightdm synaptic
 
 # Pause briefly to let user read output
