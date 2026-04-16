@@ -30,6 +30,14 @@ apt update
 apt install -y intel-microcode firmware-misc-nonfree
 # Automatic time update from the internet
 apt install chrony
+cat > /etc/conf.d/chrony <<'EOF'
+# Local OpenRC overrides for chrony
+# Ensure chrony only starts after Wi-Fi networking is up
+
+rc_need="net"
+rc_after="wireless"
+EOF
+
 
 # Pause briefly to let user read output
 sleep 10
