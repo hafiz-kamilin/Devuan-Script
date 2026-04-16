@@ -172,7 +172,7 @@ echo
 sleep 3 
 
 # Install desktop, extras, calculator, internet connection manager, display manager, and package manager
-apt install -y xfce4 xfce4-goodies galculator internet-manager internet-manager-gnome lightdm synaptic
+apt install -y xfce4 xfce4-goodies galculator network-manager network-manager-gnome lightdm synaptic
 
 # Pause briefly to let user read output
 sleep 10
