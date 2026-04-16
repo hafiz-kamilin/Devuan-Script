@@ -27,17 +27,9 @@ sed -i 's/ main$/ main contrib non-free non-free-firmware/' /etc/apt/sources.lis
 sed -i 's/ main$/ main contrib non-free non-free-firmware/' /etc/apt/sources.list.d/*.list 2>/dev/null || true
 apt update
 # Intel microcode + generic firmware bundles
-apt install -y intel-microcode firmware-misc-nonfree
+apt install -y intel-microcode firmware-misc-nonfree firmware-ralink
 # Automatic time update from the internet
 apt install chrony
-cat > /etc/conf.d/chrony <<'EOF'
-# Local OpenRC overrides for chrony
-# Ensure chrony only starts after Wi-Fi networking is up
-
-rc_need="net"
-rc_after="wireless"
-EOF
-
 
 # Pause briefly to let user read output
 sleep 10
@@ -59,6 +51,13 @@ apt install -y openrc
 echo 'export PATH="$PATH:/sbin:/usr/sbin"' >> ~/.bashrc
 # Reload updated shell configuration for current session
 source ~/.bashrc
+# set chrony to depend on OpenRC to trigger time update when connected to WIFI
+cat > /etc/conf.d/chrony <<'EOF'
+# Local OpenRC overrides for chrony
+# Ensure chrony only starts after Wi-Fi networking is up
+rc_need="net"
+rc_after="wireless"
+EOF
 
 # Pause briefly to let user read output
 sleep 10
